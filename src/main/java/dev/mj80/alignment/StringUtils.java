@@ -32,7 +32,10 @@ public class StringUtils {
         return center(string, textType.getWidth(), padLeft, padRight);
     }
     public static String center(String string, double width, boolean padLeft, boolean padRight) {
-        double stringWidth = Width.of(string);
+        return center(string, width, false, padLeft, padRight);
+    }
+    public static String center(String string, double width, boolean isBold, boolean padLeft, boolean padRight) {
+        double stringWidth = Width.of(string, isBold);
         StringBuilder centered = new StringBuilder();
         if(padLeft) {
             centered.append(generateSpace((width - stringWidth) / 2));

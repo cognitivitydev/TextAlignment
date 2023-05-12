@@ -2,6 +2,8 @@ package dev.mj80.alignment;
 
 import lombok.Getter;
 
+import java.util.ArrayList;
+
 public enum Width {
     ZERO_WIDTH('\u200C', 0),
     HALF_WIDTH('\uEFFE', 0.5),
@@ -81,11 +83,36 @@ public enum Width {
         return ZERO_WIDTH;
     }
     public static double of(String string) {
+        return of(string, false);
+    }
+    public static double of(String string, boolean isBold) {
         double width = 0;
         for(int i = 0; i < string.toCharArray().length; i++) {
             char character = string.charAt(i);
-            width += get(character).getWidth();
+            //width += bolded.contains(i) ? get(character).getBoldWidth() : get(character).getWidth();
+            width += isBold ? get(character).getBoldWidth() : get(character).getWidth();
         }
         return width;
+    }
+    
+    // wip
+    public static ArrayList<Integer> getBolded(String string) {
+        ArrayList<Integer> arrayList = new ArrayList<>();
+        boolean bold = false;
+        for(int i = 0; i < string.toCharArray().length; i++) {
+            char character = string.charAt(i);
+            char previous = i - 1 < 0 ? ' ' : string.charAt(i-1);
+            char previous2 = i - 2 < 0 ? ' ' : string.charAt(i-2);
+            char previous3 = i - 3 < 0 ? ' ' : string.charAt(i-3);
+            if(previous3 == '<' && previous2 == '/' && previous == 'b' && character == '>') {
+                bold = false;
+            } else if(previous2 == '<' && previous == 'b' && character == '>') {
+                bold = true;
+            }
+            if(bold) {
+                arrayList.add(i);
+            }
+        }
+        return arrayList;
     }
 }

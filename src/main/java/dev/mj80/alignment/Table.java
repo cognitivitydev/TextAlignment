@@ -35,13 +35,21 @@ public class Table {
     @Override public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
         for(String string : table) {
+            ArrayList<Integer> bolded = Width.getBolded(string);
             if(table.indexOf(string) % columns == 0 && table.indexOf(string) != 0) {
                 stringBuilder.append("\n");
             }
+            
+            //wip
+            String box = string;
+            if(bolded.size() != 0 && bolded.get(bolded.size()-1) == string.length()) {
+                box += "</b>";
+            }
+            
             if((table.indexOf(string) + 1) % columns != 0) {
-                stringBuilder.append(StringUtils.align(string+"%ALIGN%", boxWidth));
+                stringBuilder.append(StringUtils.align(box+"%ALIGN%", boxWidth));
             } else {
-                stringBuilder.append(string);
+                stringBuilder.append(box);
             }
         }
         return stringBuilder.toString();
