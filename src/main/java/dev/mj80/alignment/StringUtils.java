@@ -24,6 +24,8 @@ public class StringUtils {
             } else if(i >= 0.5) {
                 space.append(Width.HALF_WIDTH.getCharacter());
                 i -= 0.5;
+            } else {
+                return space.toString();
             }
         }
         return space.toString();
