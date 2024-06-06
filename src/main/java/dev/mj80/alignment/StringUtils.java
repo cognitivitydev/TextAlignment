@@ -1,16 +1,21 @@
 package dev.mj80.alignment;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class StringUtils {
-    public static String align(String string, double width) {
-        StringBuilder builder = new StringBuilder();
-        List<String> list = List.of(string.split("%ALIGN%"));
-        list.forEach(strings -> {
-            builder.append(strings).append(generateSpace(width - Width.of(strings)));
-        });
-        return builder.toString();
+    public static String alignLeft(String string, double width) {
+        return string + "<reset>"+generateSpace(width-Width.of(string));
     }
+    public static String alignRight(String string, double width) {
+        return generateSpace(width-Width.of(string))+string;
+    }
+
     public static String generateSpace(double width) {
         StringBuilder space = new StringBuilder();
         double i = width;
@@ -34,18 +39,68 @@ public class StringUtils {
         return center(string, textType.getWidth(), padLeft, padRight);
     }
     public static String center(String string, double width, boolean padLeft, boolean padRight) {
-        return center(string, width, false, padLeft, padRight);
-    }
-    public static String center(String string, double width, boolean isBold, boolean padLeft, boolean padRight) {
-        double stringWidth = Width.of(string, isBold);
         StringBuilder centered = new StringBuilder();
-        if(padLeft) {
-            centered.append(generateSpace((width - stringWidth) / 2));
-        }
-        centered.append(string);
-        if(padRight) {
-            centered.append(generateSpace((width - stringWidth) / 2));
-        }
+        List<String> lines = Arrays.stream(string.split("\n")).toList();
+
+        lines.forEach(line -> {
+            double stringWidth = Width.of(line);
+            if(padLeft) {
+                centered.append("<reset>").append(generateSpace((width - stringWidth) / 2));
+            }
+            centered.append(line);
+            if(padRight) {
+                centered.append("<reset>").append(generateSpace((width - stringWidth) / 2));
+            }
+            if(lines.indexOf(line) != lines.size()-1) {
+                centered.append("\n");
+            }
+        });
         return centered.toString();
+    }
+    public static String wrapText(String text, double maxWidth) {
+        List<String> lines = new ArrayList<>();
+        String[] inputLines = text.split("\n");
+
+        for (String inputLine : inputLines) {
+            StringBuilder currentLine = new StringBuilder();
+            String[] words = inputLine.split("\\s+");
+
+            for (String word : words) {
+                if (Width.of(word) > maxWidth) {
+                    String remainingWord = word;
+                    while (!remainingWord.isEmpty()) {
+                        int splitIndex = getSplitIndex(remainingWord, maxWidth);
+                        lines.add(remainingWord.substring(0, splitIndex));
+                        remainingWord = remainingWord.substring(splitIndex).trim();
+                    }
+                } else if (currentLine.isEmpty()) {
+                    currentLine.append(word);
+                } else if (Width.of(currentLine + " " + word) <= maxWidth) {
+                    currentLine.append(" ").append(word);
+                } else {
+                    lines.add(currentLine.toString());
+                    currentLine.setLength(0);
+                    currentLine.append(word);
+                }
+            }
+
+            if (!currentLine.isEmpty()) {
+                lines.add(currentLine.toString());
+            }
+        }
+        return String.join("\n", lines);
+    }
+
+    private static int getSplitIndex(String word, double maxWidth) {
+        int index = 0;
+        double currentWidth = 0;
+        while (index < word.length() && currentWidth + Width.of(String.valueOf(word.charAt(index))) <= maxWidth) {
+            currentWidth += Width.of(String.valueOf(word.charAt(index)));
+            index++;
+        }
+        return index;
+    }
+    protected static JsonElement parseJson(String json) {
+        return new Gson().fromJson(json, JsonElement.class);
     }
 }
